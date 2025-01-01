@@ -47,8 +47,18 @@ router.post('/authorize', (req, res) => {
     const codeChallenge = generateCodeChallenge(codeVerifier);
 
     // Store state and PKCE values
-    stateStore[state] = service;
-    pkceStore[state] = { codeVerifier, codeChallenge };
+    stateStore[state] = service;  //stateStore = {
+                                  //               "123abc456xyz": "zoho"
+                                 //                    };
+
+    pkceStore[state] = { codeVerifier, codeChallenge }; //pkceStore = {
+                                                        //       "123abc456xyz": {
+                                                         //                        codeVerifier: "random32string",
+                                                         //                         codeChallenge: "hashedAndEncodedValue"
+                                                          //                       }
+                                                          //            };
+
+    
 
     let authUrl;
     if (service === 'zoho') {
@@ -91,7 +101,8 @@ router.post('/get-tokens', async (req, res) => {
 
     try {
         let tokenResponse;
-        const codeVerifier = pkceStore[stateStore[service]]?.codeVerifier;
+        const codeVerifier = pkceStore[stateStore[service]]?.codeVerifier; //?.codeVerifier: Uses optional chaining (?.) to safely access the codeVerifier property.
+                                                                          // If pkceStore[stateStore[service]] is undefined or null, it avoids a runtime error and returns undefined
 
         if (service === 'zoho') {
             tokenResponse = await axios.post(ZOHO_TOKEN_URL, null, {
